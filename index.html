@@ -129,7 +129,8 @@ const CONTENT = {
           "Delivers your quiz link",
           "Answers questions while you sleep"
         ],
-        featured: true
+        featured: true,                   // highlighted by default
+        badge: "Most selected"            // sticker on the card, stays put on click
       }
     ]
   },
@@ -498,14 +499,32 @@ const CONTENT = {
     margin-top: 12px;
   }
   .card {
+    position: relative;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
     border-radius: 24px;
     padding: 34px 28px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
   }
-  .card.featured {
-    border: 2px solid var(--accent);
+  .card.selected {
+    border-color: var(--accent);
     box-shadow: 0 24px 60px -24px color-mix(in srgb, var(--accent) 38%, transparent);
+  }
+  .card-badge {
+    position: absolute;
+    top: -14px;
+    right: 22px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #fff;
+    background: var(--accent);
+    padding: 7px 15px;
+    border-radius: 999px;
+    transform: rotate(2deg);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 35%, transparent);
   }
   .card h3 {
     font-family: "Bricolage Grotesque", "Inter", sans-serif;
@@ -620,7 +639,7 @@ const CONTENT = {
 
     .cards { grid-template-columns: 1fr 1fr; align-items: start; gap: 28px; }
     .card { padding: 40px 36px; }
-    .card.featured { transform: translateY(-8px); }
+    .card.selected { transform: translateY(-8px); }
   }
 
   /* ---------- reduced motion ---------- */
@@ -630,7 +649,7 @@ const CONTENT = {
     .reveal { transition: none; opacity: 1; transform: none; }
     .mq-result.show { animation: none; }
     .chart-bar { transition: none; }
-    .btn, .btn-ghost, .mq-option { transition: none; }
+    .btn, .btn-ghost, .mq-option, .card { transition: none; }
     .btn:hover, .btn-ghost:hover, .mq-option:hover { transform: none; }
   }
 </style>
@@ -827,11 +846,18 @@ const CONTENT = {
     $("howSteps").appendChild(step);
   });
 
-  /* ----- pricing (cards are informational only) ----- */
+  /* ----- pricing (informational; clicking a card just moves the
+           highlight so a curious tap gets visual feedback) ----- */
   $("pricingKicker").textContent = C.pricing.kicker;
   C.pricing.cards.forEach(card => {
     const el = document.createElement("div");
-    el.className = "card reveal" + (card.featured ? " featured" : "");
+    el.className = "card reveal" + (card.featured ? " selected" : "");
+    if (card.badge) {
+      const badge = document.createElement("span");
+      badge.className = "card-badge";
+      badge.textContent = card.badge;
+      el.appendChild(badge);
+    }
     const name = document.createElement("h3");
     name.textContent = card.name;
     const price = document.createElement("div");
@@ -847,6 +873,10 @@ const CONTENT = {
       ul.appendChild(li);
     });
     el.append(name, price, note, ul);
+    el.addEventListener("click", () => {
+      document.querySelectorAll(".card").forEach(x => x.classList.remove("selected"));
+      el.classList.add("selected");
+    });
     $("pricingCards").appendChild(el);
   });
 
