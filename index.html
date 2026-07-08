@@ -493,11 +493,14 @@ const CONTENT = {
   }
   #whyBelow { padding-top: 44px; }
 
-  /* ---------- how ---------- */
+  /* ---------- how (sticky scene: steps open in sequence on scroll) ---------- */
+  #how { padding: 0; }
+  .scene--how { height: 220vh; }
   .step {
     position: relative;
     padding: 0 0 36px 58px;
   }
+  #how .step { opacity: 0; will-change: opacity, transform; }
   .step:last-child { padding-bottom: 0; }
   .step::before {
     content: "";
@@ -508,7 +511,19 @@ const CONTENT = {
     width: 2px;
     background: var(--border);
   }
-  .step:last-child::before { display: none; }
+  .step::after {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 42px;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    transform: scaleY(var(--line, 0));
+    transform-origin: top;
+  }
+  .step:last-child::before,
+  .step:last-child::after { display: none; }
   .step-num {
     position: absolute;
     left: 0;
@@ -524,7 +539,9 @@ const CONTENT = {
     color: var(--accent);
     background: var(--accent-soft);
     border-radius: 50%;
+    transition: background 0.3s ease, color 0.3s ease;
   }
+  .step.on .step-num { background: var(--accent); color: #fff; }
   .step h3 {
     font-family: "Bricolage Grotesque", "Inter", sans-serif;
     font-weight: 800;
@@ -694,12 +711,16 @@ const CONTENT = {
     .btn, .btn-ghost, .mq-option, .card { transition: none; }
     .btn:hover, .btn-ghost:hover, .mq-option:hover { transform: none; }
     .scroll-progress { display: none; }
-    /* the scene flattens into normal, fully visible content */
+    /* the scenes flatten into normal, fully visible content */
     .scene { height: auto; }
     .scene-sticky { position: static; height: auto; overflow: visible; }
     .scene-lines { min-height: 0; }
     .scene-line { position: static; opacity: 1; transform: none; margin-bottom: 12px; }
     .scene-number { transform: none; }
+    #how { padding: 84px 0; }
+    #how .step { opacity: 1; transform: none; }
+    .step::after { display: none; }
+    .step-num { transition: none; }
   }
 </style>
 </head>
@@ -761,9 +782,13 @@ const CONTENT = {
 </section>
 
 <section id="how">
-  <div class="container narrow">
-    <span class="kicker reveal" id="howKicker"></span>
-    <div class="steps" id="howSteps"></div>
+  <div class="scene scene--how" id="howScene">
+    <div class="scene-sticky">
+      <div class="container narrow">
+        <span class="kicker" id="howKicker"></span>
+        <div class="steps" id="howSteps"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -925,11 +950,11 @@ const CONTENT = {
     });
   }
 
-  /* ----- how ----- */
+  /* ----- how: steps open one by one as the scene is scrolled ----- */
   $("howKicker").textContent = C.how.kicker;
   C.how.steps.forEach((s, i) => {
     const step = document.createElement("div");
-    step.className = "step reveal";
+    step.className = "step";
     const num = document.createElement("div");
     num.className = "step-num";
     num.textContent = i + 1;
@@ -940,6 +965,26 @@ const CONTENT = {
     step.append(num, title, p);
     $("howSteps").appendChild(step);
   });
+
+  /* how scene engine: each step fades in at its own scroll window,
+     then its connector line draws down toward the next step */
+  function howUpdate() {
+    const wrap = $("howScene");
+    const rect = wrap.getBoundingClientRect();
+    const scrollable = rect.height - window.innerHeight;
+    if (scrollable <= 0) return;
+    if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+    const p = Math.max(0, Math.min(1, -rect.top / scrollable));
+    document.querySelectorAll("#howSteps .step").forEach((el, i) => {
+      const start = 0.06 + i * 0.3;
+      const o = Math.max(0, Math.min(1, (p - start) / 0.14));
+      el.style.opacity = o.toFixed(3);
+      el.style.transform = "translateY(" + ((1 - o) * 28).toFixed(1) + "px)";
+      el.classList.toggle("on", o > 0.5);
+      const line = Math.max(0, Math.min(1, (p - (start + 0.12)) / 0.16));
+      el.style.setProperty("--line", line.toFixed(3));
+    });
+  }
 
   /* ----- pricing (informational; clicking a card just moves the
            highlight so a curious tap gets visual feedback) ----- */
@@ -1033,6 +1078,7 @@ const CONTENT = {
     function raf(t) {
       if (lenis) lenis.raf(t);
       sceneUpdate();
+      howUpdate();
       const max = document.documentElement.scrollHeight - window.innerHeight;
       progress.style.width = (max > 0 ? (window.scrollY / max * 100) : 0).toFixed(2) + "%";
       requestAnimationFrame(raf);
