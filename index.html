@@ -75,14 +75,21 @@ const CONTENT = {
 
   why: {
     kicker: "Why quizzes",
+    // The cinematic scene: scrolling scrubs the big number from 20 to 40
+    // while the stat sentences float in and out at their scroll windows.
+    // "in"/"out" are scroll progress points (0 to 1) where a line fades.
+    scene: {
+      from: 20,
+      to: 40,
+      lines: [
+        { text: "PDF lead magnets convert around 20 percent.", in: -1,   out: 0.3 },
+        { text: "Quizzes average around 40.",                  in: 0.36, out: 0.62 },
+        { text: "Same traffic, double the emails.",            in: 0.68, out: 9 }
+      ]
+    },
     paragraphs: [
-      "PDF lead magnets convert around 20 percent. Quizzes average around 40. Same traffic, double the emails.",
       "And a quiz tells you who's ready to buy before you ever talk to them.",
       "Tools like involve.me charge up to $99 a month for a template. I build yours custom, on your own domain, once."
-    ],
-    chart: [                              // visualizes the two stats from the copy
-      { label: "PDF", value: 20, display: "~20%" },
-      { label: "Quiz", value: 40, display: "~40%" }
     ]
   },
 
@@ -304,13 +311,36 @@ const CONTENT = {
     animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   header .hero-item { animation-delay: 0.05s; }
-  #hero h1.hero-item { animation-delay: 0.15s; }
-  #hero .subhead.hero-item { animation-delay: 0.3s; }
-  #hero .mini-quiz.hero-item { animation-delay: 0.45s; }
-  #hero .hero-alt.hero-item { animation-delay: 0.6s; }
+  #hero .subhead.hero-item { animation-delay: 0.55s; }
+  #hero .mini-quiz.hero-item { animation-delay: 0.7s; }
+  #hero .hero-alt.hero-item { animation-delay: 0.85s; }
 
   @keyframes rise {
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* the headline types itself letter by letter */
+  #hero h1 .word { display: inline-block; white-space: nowrap; }
+  #hero h1 .ch {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(0.4em) rotate(5deg);
+    animation: chIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes chIn {
+    to { opacity: 1; transform: translateY(0) rotate(0deg); }
+  }
+
+  /* thin scroll progress bar, fixed to the top edge */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--accent);
+    z-index: 60;
+    pointer-events: none;
   }
 
   /* ---------- mini quiz (signature element) ---------- */
@@ -424,32 +454,44 @@ const CONTENT = {
     line-height: 1.3;
     color: var(--ink);
   }
-  .chart {
-    margin: 34px 0 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    max-width: 480px;
-  }
-  .chart-row { display: grid; grid-template-columns: 52px 1fr; align-items: center; gap: 14px; }
-  .chart-label { font-size: 14px; font-weight: 600; color: var(--text-muted); }
-  .chart-track { position: relative; height: 40px; }
-  .chart-bar {
-    height: 100%;
-    width: 0;
-    border-radius: 10px;
-    background: var(--border);
+  /* the sticky cinematic scene: scroll scrubs the number and the lines */
+  #why { padding: 0 0 100px; }
+  .scene { height: 240vh; }
+  .scene-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    padding-right: 12px;
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--ink);
-    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
-    white-space: nowrap;
+    overflow: hidden;
   }
-  .chart-row:last-child .chart-bar { background: var(--accent); color: #fff; }
+  .scene-number {
+    font-size: clamp(96px, 30vw, 220px);
+    color: var(--accent);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin: 12px 0 30px;
+    transform-origin: left center;
+    font-variant-numeric: tabular-nums;
+    will-change: transform;
+  }
+  .scene-lines {
+    position: relative;
+    min-height: 4.4em;
+    font-size: clamp(21px, 6vw, 30px);
+  }
+  .scene-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    font-family: "Bricolage Grotesque", "Inter", sans-serif;
+    font-weight: 700;
+    line-height: 1.3;
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  #whyBelow { padding-top: 44px; }
 
   /* ---------- how ---------- */
   .step {
@@ -646,15 +688,24 @@ const CONTENT = {
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .hero-item { animation: none; opacity: 1; transform: none; }
+    #hero h1 .ch { animation: none; opacity: 1; transform: none; }
     .reveal { transition: none; opacity: 1; transform: none; }
     .mq-result.show { animation: none; }
-    .chart-bar { transition: none; }
     .btn, .btn-ghost, .mq-option, .card { transition: none; }
     .btn:hover, .btn-ghost:hover, .mq-option:hover { transform: none; }
+    .scroll-progress { display: none; }
+    /* the scene flattens into normal, fully visible content */
+    .scene { height: auto; }
+    .scene-sticky { position: static; height: auto; overflow: visible; }
+    .scene-lines { min-height: 0; }
+    .scene-line { position: static; opacity: 1; transform: none; margin-bottom: 12px; }
+    .scene-number { transform: none; }
   }
 </style>
 </head>
 <body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <header>
   <div class="container"><div class="logo hero-item" id="logo"></div></div>
@@ -664,7 +715,7 @@ const CONTENT = {
   <div class="container">
     <div class="hero-grid">
       <div>
-        <h1 class="display hero-item" id="heroHeadline"></h1>
+        <h1 class="display" id="heroHeadline"></h1>
         <p class="subhead hero-item" id="heroSubhead"></p>
       </div>
       <div>
@@ -695,10 +746,17 @@ const CONTENT = {
 </section>
 
 <section id="why">
-  <div class="container narrow">
-    <span class="kicker reveal" id="whyKicker"></span>
+  <div class="scene" id="whyScene">
+    <div class="scene-sticky">
+      <div class="container narrow">
+        <span class="kicker" id="whyKicker"></span>
+        <div class="scene-number display" id="sceneNumber"></div>
+        <div class="scene-lines" id="sceneLines"></div>
+      </div>
+    </div>
+  </div>
+  <div class="container narrow" id="whyBelow">
     <div id="whyParagraphs"></div>
-    <div class="chart reveal" id="whyChart"></div>
   </div>
 </section>
 
@@ -738,10 +796,12 @@ const CONTENT = {
   </div>
 </footer>
 
+<script src="https://unpkg.com/lenis@1.3.21/dist/lenis.min.js"></script>
 <script>
 (function () {
   const $ = id => document.getElementById(id);
   const C = CONTENT;
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ----- apply brand colors from config ----- */
   const cs = C.brand.colors;
@@ -759,18 +819,40 @@ const CONTENT = {
   /* ----- header ----- */
   $("logo").innerHTML = C.brand.logoText + " <span>" + C.brand.logoAccent + "</span>";
 
-  /* ----- hero (highlight phrase gets the blue underline) ----- */
-  const h = C.hero.headline;
-  if (C.hero.highlight && h.includes(C.hero.highlight)) {
-    const parts = h.split(C.hero.highlight);
-    $("heroHeadline").append(
-      document.createTextNode(parts[0]),
-      Object.assign(document.createElement("em"), { className: "hl", textContent: C.hero.highlight }),
-      document.createTextNode(parts.slice(1).join(C.hero.highlight))
-    );
-  } else {
-    $("heroHeadline").textContent = h;
-  }
+  /* ----- hero headline: types itself letter by letter, the
+           highlight phrase keeps the blue underline ----- */
+  (function buildHeadline() {
+    const el = $("heroHeadline");
+    const headline = C.hero.headline;
+    const hl = C.hero.highlight;
+    const segs = [];
+    if (hl && headline.includes(hl)) {
+      const pre = headline.slice(0, headline.indexOf(hl));
+      const post = headline.slice(headline.indexOf(hl) + hl.length);
+      if (pre.trim()) segs.push({ t: pre.trim(), hl: false });
+      segs.push({ t: hl.trim(), hl: true });
+      if (post.trim()) segs.push({ t: post.trim(), hl: false });
+    } else {
+      segs.push({ t: headline, hl: false });
+    }
+    const words = [];
+    segs.forEach(sg => sg.t.split(/\s+/).forEach(w => words.push({ w, hl: sg.hl })));
+    let ci = 0;
+    words.forEach((wo, wi) => {
+      if (wi) el.appendChild(document.createTextNode(" "));
+      const span = document.createElement("span");
+      span.className = "word" + (wo.hl ? " hl" : "");
+      [...wo.w].forEach(chr => {
+        const c = document.createElement("span");
+        c.className = "ch";
+        c.textContent = chr;
+        c.style.animationDelay = (0.15 + ci * 0.016).toFixed(3) + "s";
+        ci++;
+        span.appendChild(c);
+      });
+      el.appendChild(span);
+    });
+  })();
   $("heroSubhead").textContent = C.hero.subhead;
   $("heroBtn").textContent = C.hero.buttonLabel;
   $("heroBtn").href = C.hero.buttonHref;
@@ -804,31 +886,44 @@ const CONTENT = {
   $("demoBtn").textContent = C.demo.buttonLabel;
   $("demoBtn").href = C.demo.url;
 
-  /* ----- why ----- */
+  /* ----- why: the scroll-scrubbed scene + the remaining paragraphs ----- */
   $("whyKicker").textContent = C.why.kicker;
+  const scene = C.why.scene;
+  $("sceneNumber").textContent = (REDUCED ? scene.to : scene.from) + "%";
+  scene.lines.forEach(line => {
+    const d = document.createElement("div");
+    d.className = "scene-line";
+    d.dataset.in = line.in;
+    d.dataset.out = line.out;
+    d.textContent = line.text;
+    $("sceneLines").appendChild(d);
+  });
   C.why.paragraphs.forEach(text => {
     const p = document.createElement("p");
     p.className = "reveal";
     p.textContent = text;
     $("whyParagraphs").appendChild(p);
   });
-  C.why.chart.forEach(row => {
-    const el = document.createElement("div");
-    el.className = "chart-row";
-    const label = document.createElement("div");
-    label.className = "chart-label";
-    label.textContent = row.label;
-    const track = document.createElement("div");
-    track.className = "chart-track";
-    const bar = document.createElement("div");
-    bar.className = "chart-bar";
-    bar.dataset.value = row.value;
-    bar.textContent = row.display;
-    track.appendChild(bar);
-    el.appendChild(label);
-    el.appendChild(track);
-    $("whyChart").appendChild(el);
-  });
+
+  /* scene engine: maps scroll progress to the number and line opacity */
+  function sceneUpdate() {
+    const wrap = $("whyScene");
+    const rect = wrap.getBoundingClientRect();
+    const scrollable = rect.height - window.innerHeight;
+    if (scrollable <= 0) return;
+    if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+    const p = Math.max(0, Math.min(1, -rect.top / scrollable));
+    $("sceneNumber").textContent = Math.round(scene.from + (scene.to - scene.from) * p) + "%";
+    $("sceneNumber").style.transform = "scale(" + (1 + p * 0.1).toFixed(3) + ")";
+    document.querySelectorAll(".scene-line").forEach(el => {
+      const a = parseFloat(el.dataset.in), b = parseFloat(el.dataset.out);
+      const fadeIn = Math.max(0, Math.min(1, (p - a) / 0.12));
+      const fadeOut = 1 - Math.max(0, Math.min(1, (p - b) / 0.12));
+      const o = fadeIn * fadeOut;
+      el.style.opacity = o.toFixed(3);
+      el.style.transform = "translateY(" + ((1 - o) * 24).toFixed(1) + "px)";
+    });
+  }
 
   /* ----- how ----- */
   $("howKicker").textContent = C.how.kicker;
@@ -905,26 +1000,44 @@ const CONTENT = {
   $("footerEmail").innerHTML = C.footer.emailLabel + ' <a href="mailto:' + C.footer.email + '">' + C.footer.email + "</a>";
   $("footerNote").textContent = C.footer.note;
 
-  /* ----- scroll reveal + chart fill ----- */
-  const maxValue = Math.max(...C.why.chart.map(r => r.value));
-  const fillBars = () => document.querySelectorAll(".chart-bar").forEach(b => {
-    b.style.width = (b.dataset.value / maxValue * 100) + "%";
-  });
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reduced || !("IntersectionObserver" in window)) {
+  /* ----- scroll reveals ----- */
+  if (REDUCED || !("IntersectionObserver" in window)) {
     document.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
-    fillBars();
   } else {
     const io = new IntersectionObserver(entries => {
       entries.forEach(e => {
         if (!e.isIntersecting) return;
         e.target.classList.add("in");
-        if (e.target.id === "whyChart") fillBars();
         io.unobserve(e.target);
       });
     }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
     document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+  }
+
+  /* ----- smooth scroll engine (Lenis) + scene + progress bar ----- */
+  if (!REDUCED) {
+    const lenis = window.Lenis ? new Lenis({ lerp: 0.09, smoothWheel: true }) : null;
+    if (lenis) {
+      window.__lenis = lenis;
+      document.documentElement.style.scrollBehavior = "auto";
+      document.addEventListener("click", e => {
+        const a = e.target.closest('a[href^="#"]');
+        if (!a || a.getAttribute("href").length < 2) return;
+        const target = document.querySelector(a.getAttribute("href"));
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target, { offset: -10 });
+      });
+    }
+    const progress = $("scrollProgress");
+    function raf(t) {
+      if (lenis) lenis.raf(t);
+      sceneUpdate();
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = (max > 0 ? (window.scrollY / max * 100) : 0).toFixed(2) + "%";
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
   }
 })();
 </script>
