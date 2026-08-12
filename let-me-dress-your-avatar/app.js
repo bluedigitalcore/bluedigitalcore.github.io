@@ -7,7 +7,14 @@
 
   var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var CAN_HOVER = window.matchMedia('(hover: hover)').matches;
+  var SMALL = window.matchMedia('(max-width: 760px)').matches;
+
+  // Do NOT branch on event.pointerType inside a click handler. A click born
+  // from a tap is a compatibility mouse event and several browsers report
+  // pointerType as "mouse" (or ""), so a touch tap looks like a mouse click
+  // and gets ignored. touchstart only ever fires on real touch input.
+  var TOUCH = false;
+  window.addEventListener('touchstart', function () { TOUCH = true; }, { once: true, passive: true });
 
   /* ----------------------------------------------------------- smooth -- */
   var lenis = null;
@@ -21,7 +28,7 @@
   // sequence nobody can see at full temporal resolution anyway, so small
   // screens load every second frame and halve the download.
   var HERO_TOTAL = 420;
-  var STRIDE = window.matchMedia('(max-width: 760px)').matches ? 2 : 1;
+  var STRIDE = SMALL ? 2 : 1;
   var HERO_COUNT = Math.ceil(HERO_TOTAL / STRIDE);
   var heroPath = function (i) {
     return 'frames/hero/f_' + String(i * STRIDE + 1).padStart(4, '0') + '.jpg';
@@ -61,13 +68,23 @@
     }).observe(canvas);
   }
 
+  // A 16:9 frame cover-fitted into a tall phone screen shows only about a
+  // quarter of its width, which crops the studio hard and makes the wall
+  // logo look cramped. Pull back on small screens and letterbox instead.
+  var ZOOM = SMALL ? 0.72 : 1;
+
   function paint(img) {
     var cw = canvas.width, ch = canvas.height;
     var ir = img.naturalWidth / img.naturalHeight, cr = cw / ch;
-    var w, h, x, y;
-    if (ir > cr) { h = ch; w = ch * ir; x = (cw - w) / 2; y = 0; }
-    else { w = cw; h = cw / ir; x = 0; y = (ch - h) / 2; }
-    ctx.drawImage(img, x, y, w, h);
+    var w, h;
+    if (ir > cr) { h = ch; w = ch * ir; }
+    else { w = cw; h = cw / ir; }
+    if (ZOOM !== 1) {
+      w *= ZOOM; h *= ZOOM;
+      ctx.fillStyle = '#D8D0C7';           // --back-2, matches the hero bed
+      ctx.fillRect(0, 0, cw, ch);
+    }
+    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
   }
 
   // Nearest already-decoded frame, so scrubbing works mid-load.
@@ -298,6 +315,7 @@
 
   function stop(card) {
     if (!card) return;
+    card.dataset.want = '';
     var v = card.querySelector('video');
     if (v) { v.pause(); try { v.currentTime = 0; } catch (e) {} }
     card.classList.remove('playing');
@@ -315,15 +333,21 @@
   function play(card) {
     var v = card.querySelector('video');
     if (!v) return;
+    card.dataset.want = '1';
     if (!v.src) {                                      // <-- the only place a clip is fetched
       v.src = v.dataset.src;
       v.load();
+      // The class is added only once the clip is genuinely running, so a
+      // blocked play can never hide the poster behind a dead black frame.
+      v.addEventListener('playing', function () {
+        if (card.dataset.want === '1') card.classList.add('playing');
+      });
       v.addEventListener('canplay', function () {
-        if (card.classList.contains('playing')) attempt(v);
-      }, { once: true });
+        if (card.dataset.want === '1') attempt(v);
+      });
     }
     attempt(v);
-    card.classList.add('playing');
+    if (!v.paused) card.classList.add('playing');
     if (playing && playing !== card) stop(playing);
     playing = card;
   }
@@ -341,18 +365,19 @@
         '<figcaption class="card__meta"><span class="card__name">' + w.t + '</span>' +
         '<span class="card__tag">' + w.c + '</span></figcaption>';
 
-      // Decide per event, not per media query. Hybrid laptops report
-      // hover:hover but are used by touch, and a media query cannot tell
-      // which one the visitor actually used.
+      // Mouse drives hover. Touch drives tap-to-toggle. The TOUCH flag comes
+      // from a real touchstart, which is the only reliable signal.
       card.addEventListener('pointerenter', function (e) {
-        if (e.pointerType === 'mouse') play(card);
+        if (TOUCH || e.pointerType !== 'mouse') return;
+        play(card);
       });
       card.addEventListener('pointerleave', function (e) {
-        if (e.pointerType === 'mouse') stop(card);
+        if (TOUCH || e.pointerType !== 'mouse') return;
+        stop(card);
       });
-      card.addEventListener('click', function (e) {
-        if (e.pointerType === 'mouse') return;          // mouse is handled by hover
-        if (card.classList.contains('playing')) stop(card); else play(card);
+      card.addEventListener('click', function () {
+        if (!TOUCH) return;                             // mouse is handled by hover
+        if (card.dataset.want === '1') stop(card); else play(card);
       });
       // stagger across each row so the grid arrives left to right
       card.style.setProperty('--d', (idx % 4) * 70 + 'ms');

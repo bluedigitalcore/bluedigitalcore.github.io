@@ -54,6 +54,13 @@ body{
 img{ max-width:100%; display:block; }
 a{ color:inherit; }
 
+.sr-only{
+  position:absolute; width:1px; height:1px;
+  padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0 0 0 0); clip-path:inset(50%);
+  white-space:nowrap; border:0;
+}
+
 .wrap{
   width:100%;
   max-width:var(--wrap);
@@ -176,8 +183,13 @@ html.lenis{ height:auto; }
   /* seven screens of thumb-scrolling for one clip is too much on a phone */
   .hero{ height:460vh; }
   .hero__overlay{ flex-direction:column; align-items:flex-start; gap:14px; }
-  .hero__logo{ width:min(74vw, 360px); }
-  .hero__sub{ font-size:15px; max-width:30ch; text-align:left; margin:0; }
+  /* The lockup already exists on the studio wall, and on a narrow screen the
+     two fight each other. The footage carries the branding here. */
+  .hero__logo{ display:none; }
+  .hero__sub{
+    font-size:17px; font-weight:600; max-width:26ch;
+    text-align:left; margin:0;
+  }
   .hero__cue{ display:none; }
 }
 
