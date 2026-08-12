@@ -182,7 +182,18 @@ html.lenis{ height:auto; }
 @media (max-width:760px){
   /* seven screens of thumb-scrolling for one clip is too much on a phone */
   .hero{ height:460vh; }
-  .hero__overlay{ flex-direction:column; align-items:flex-start; gap:14px; }
+  /* The frame is drawn at 0.72 scale, so it ends at 86% of the stage and the
+     cream band runs from there to the bottom. Make the overlay exactly that
+     band and centre the copy in it, instead of guessing an offset that ends
+     up flush against the bottom edge of the footage. */
+  .hero__overlay{
+    top:86%; bottom:0;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    gap:10px;
+    padding-bottom:6px;
+  }
   /* The lockup already exists on the studio wall, and on a narrow screen the
      two fight each other. The footage carries the branding here. */
   .hero__logo{ display:none; }
