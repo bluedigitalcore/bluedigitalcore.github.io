@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Let Me Dress Your Avatar | Custom AI Avatar Outfit Design</title>
+<meta name="description" content="Custom outfits for your AI avatar. Front and back. Yours in 48 hours.">
+<meta name="theme-color" content="#F7F3EE">
+
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="mask-icon" href="assets/favicon.svg" color="#5E1F2D">
+
+<meta property="og:title" content="Let Me Dress Your Avatar">
+<meta property="og:description" content="Custom outfits for your AI avatar. Front and back. Yours in 48 hours.">
+<meta property="og:image" content="https://bluedigitalcore.github.io/let-me-dress-your-avatar/posters/f1-golden-dress.jpg">
+<meta property="og:url" content="https://bluedigitalcore.github.io/let-me-dress-your-avatar/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://bluedigitalcore.github.io/let-me-dress-your-avatar/">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=19">
+<link rel="preload" as="image" href="frames/hero/f_0001.jpg">
+</head>
+<body>
+
+<!-- film grain -->
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ============ HERO : scroll-scrubbed frame sequence ============ -->
+<section class="hero" id="hero">
+  <div class="hero__stage">
+    <canvas class="hero__canvas" id="heroCanvas"></canvas>
+    <div class="hero__veil" aria-hidden="true"></div>
+
+    <div class="hero__overlay" id="heroOverlay">
+      <img class="hero__logo" src="assets/logo.png" width="2180" height="989"
+           alt="Let Me Dress Your Avatar" fetchpriority="high">
+      <p class="hero__sub">Custom outfits for your AI avatar. Front and back. Yours in 48&nbsp;hours.</p>
+    </div>
+
+    <div class="hero__cue" id="heroCue" aria-hidden="true">
+      <span>Scroll</span>
+      <i></i>
+    </div>
+
+    <div class="hero__loader" id="heroLoader" aria-hidden="true"><i id="heroLoaderBar"></i></div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" data-dir="1" aria-hidden="true"><div class="marquee__track"></div></div>
+
+<!-- ============ MANIFESTO ============ -->
+<section class="manifesto" id="manifesto">
+  <div class="wrap">
+    <p class="eyebrow reveal">The point</p>
+    <h2 class="manifesto__head reveal">Your avatar isn't wearing what everyone else is wearing.</h2>
+    <div class="manifesto__grid">
+      <div class="manifesto__body stagger">
+        <p class="reveal">Most AI avatars get dressed once and stay dressed. Same jacket, same jeans, every post, every season. Lazy, and it shows.</p>
+        <p class="reveal">Yours gets an outfit built for the occasion. The club night. The beach day. The gym session. The dinner where she needs to look like she meant it.</p>
+        <p class="reveal manifesto__kicker">Front and back. In 48 hours. Tell me the occasion and I'll handle the rest.</p>
+      </div>
+      <figure class="manifesto__shot reveal">
+        <img src="posters/f1-golden-dress.jpg" alt="Custom gown designed for an evening occasion" loading="lazy" decoding="async" width="720" height="1280">
+        <figcaption>The Gala, front and back in 48 hours</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats" id="stats">
+  <div class="wrap stats__grid stagger">
+    <div class="stat reveal"><span class="stat__num" data-count="207" data-suffix="+">207+</span><span class="stat__label">Custom Outfits Designed</span></div>
+    <div class="stat reveal"><span class="stat__num" data-count="48">48</span><span class="stat__label">Hour Turnaround</span></div>
+    <div class="stat reveal"><span class="stat__num stat__num--text">Front&nbsp;and&nbsp;Back</span><span class="stat__label">Every Time</span></div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" data-dir="-1" aria-hidden="true"><div class="marquee__track"></div></div>
+
+<!-- ============ PILLARS : pinned ============ -->
+<section class="pillars" id="pillars">
+  <div class="pillars__stage">
+    <div class="wrap pillars__inner">
+      <div class="pillars__rail" aria-hidden="true">
+        <i data-i="0"></i><i data-i="1"></i><i data-i="2"></i>
+      </div>
+      <div class="pillars__deck">
+
+        <article class="pillar" data-i="0">
+          <div class="pillar__text">
+            <span class="pillar__no">01</span>
+            <h3 class="pillar__title">The Looks</h3>
+            <p class="pillar__copy">No preset menu and no catalogue. Tell me the occasion and I design for it.</p>
+          </div>
+          <div class="pillar__media pillar__fan">
+            <img src="posters/f2-red-outfit.jpg" alt="Club night look" loading="lazy" decoding="async">
+            <img src="posters/m1-grey-suit.jpg" alt="Tailored suit look" loading="lazy" decoding="async">
+            <img src="posters/f1-gym-1.jpg" alt="Gym wear look" loading="lazy" decoding="async">
+          </div>
+        </article>
+
+        <article class="pillar" data-i="1">
+          <div class="pillar__text">
+            <span class="pillar__no">02</span>
+            <h3 class="pillar__title">The Process</h3>
+            <p class="pillar__copy">Send your avatar's face and body reference, tell me what you need, get finished renders in 48 hours.</p>
+          </div>
+          <div class="pillar__media pillar__pair">
+            <figure><img src="posters/f1-navy-dress.jpg" alt="Front view" loading="lazy" decoding="async"><figcaption>Front</figcaption></figure>
+            <figure><img src="posters/f1-navy-dress-back.jpg" alt="Back view" loading="lazy" decoding="async"><figcaption>Back</figcaption></figure>
+          </div>
+        </article>
+
+        <article class="pillar" data-i="2">
+          <div class="pillar__text">
+            <span class="pillar__no">03</span>
+            <h3 class="pillar__title">The Drop</h3>
+            <p class="pillar__copy">One bundle, or a new wardrobe every month.</p>
+          </div>
+          <div class="pillar__media pillar__reel">
+            <img src="posters/m2-green-suit-2.jpg" alt="Launch party look" loading="lazy" decoding="async">
+            <video id="dropReel" data-src="clips/m2-green-suit-2.mp4" preload="none" muted loop playsinline disablepictureinpicture></video>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee marquee--beige" data-dir="1" aria-hidden="true"><div class="marquee__track"></div></div>
+
+<!-- ============ GALLERY ============ -->
+<section class="gallery" id="work">
+  <div class="wrap">
+    <header class="gallery__head">
+      <p class="eyebrow reveal">The portfolio</p>
+      <h2 class="gallery__title reveal">Recent work</h2>
+      <p class="gallery__note reveal">A few of the occasions I've dressed for. Yours doesn't have to be on this list.</p>
+      <div class="filters reveal" id="filters" role="tablist" aria-label="Filter recent work"></div>
+    </header>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" data-dir="-1" aria-hidden="true"><div class="marquee__track"></div></div>
+
+<!-- ============ PRICING ============ -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <p class="eyebrow reveal">The offer</p>
+    <h2 class="sec__title reveal">Pick your wardrobe</h2>
+    <div class="plans stagger">
+
+      <article class="plan reveal">
+        <h3 class="plan__name">Wardrobe Drop</h3>
+        <p class="plan__price">$37</p>
+        <ul class="plan__list">
+          <li>5 custom looks, any occasion</li>
+          <li>Front and back view of every look</li>
+          <li>Delivered in 48 hours</li>
+          <li>One round of revisions within 5 days</li>
+        </ul>
+        <a class="btn btn--solid" href="https://buy.stripe.com/7sY4gzcL92307Wq5y5cbC00">Get the drop</a>
+      </article>
+
+      <article class="plan plan--alt reveal">
+        <span class="plan__flag">Best value</span>
+        <h3 class="plan__name">Monthly Wardrobe</h3>
+        <p class="plan__price">$67<span>/month</span></p>
+        <ul class="plan__list">
+          <li>8 custom looks a month, delivered as two drops of 4 or one drop of 8</li>
+          <li>Front and back view of every look</li>
+          <li>48 hours per drop</li>
+          <li>One revision round per drop</li>
+          <li>Cancel anytime</li>
+        </ul>
+        <a class="btn btn--solid" href="https://buy.stripe.com/7sYaEX26vePMdgKbWtcbC01">Start monthly</a>
+      </article>
+
+    </div>
+    <!-- Intake form, delivered to the buyer AFTER payment. Deliberately not
+         linked on the page: https://form.jotform.com/262227475287061 -->
+    <p class="pricing__after reveal">After checkout you'll get a short form to send me your avatar's references and tell me what you want.</p>
+  </div>
+</section>
+
+<!-- ============ FINALE ============ -->
+<section class="finale" id="start">
+  <img class="turnmark" src="assets/mark-outline.svg" alt="" aria-hidden="true">
+  <div class="wrap finale__inner">
+    <p class="eyebrow eyebrow--inv reveal">The next step</p>
+    <h2 class="finale__head reveal">Ready to dress your avatar?</h2>
+    <a class="btn btn--big reveal" href="https://buy.stripe.com/7sY4gzcL92307Wq5y5cbC00">Start your wardrobe</a>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot__top">
+    <button class="totop" type="button" id="toTop">
+      <i aria-hidden="true"></i>
+      <span>Back to top</span>
+    </button>
+  </div>
+  <div class="wrap foot__inner">
+    <img class="foot__logo" src="assets/logo.png" alt="Let Me Dress Your Avatar">
+    <a class="foot__credit" href="https://instagram.com/soloandfearless" target="_blank" rel="noopener">@soloandfearless</a>
+  </div>
+</footer>
+
+<script src="assets/lenis.min.js"></script>
+<script src="app.js?v=18"></script>
+</body>
+</html>
