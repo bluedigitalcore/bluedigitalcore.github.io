@@ -88,6 +88,12 @@ finale). Both redirect after payment to the JotForm intake form. That form is
 deliberately **not** linked anywhere on the page: buyers reach it only via Stripe's
 post-payment redirect.
 
+The **packs** section links out to three Beacons product pages (prompt packs, a
+separate DIY product from the done-for-you service). Prices are deliberately not
+shown on this page: Beacons runs changing promos and discount codes, so any price
+hardcoded here goes stale with nothing to catch it. Beacons shows the live price on
+click. The Halloween pack is seasonal and the markup makes swapping a card trivial.
+
 ## Palette
 
 Fixed and exact. Do not substitute.
@@ -96,7 +102,10 @@ Fixed and exact. Do not substitute.
 `#8A7F76` muted · `#5E1F2D` accent
 
 Section tones alternate deliberately: manifesto cream, stats beige, pillars cream,
-gallery beige, pricing cream, finale black, footer cream. A marquee always carries
-the tone of the section it leads into.
+gallery beige, packs cream, pricing beige, finale black, footer cream. A marquee
+always carries the tone of the section it leads into.
+
+Inserting a section mid-page forces every tone after it to flip, plus the marquee
+in front of it. Re-run the tone probe after any insertion.
 
 Display font Archivo Black, body Inter.
