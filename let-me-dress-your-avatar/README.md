@@ -90,7 +90,12 @@ on scroll. Nothing but the hero loads on first paint. The 21st clip
 ## Commerce
 
 Two Stripe Payment Links in USD, hardcoded in `index.html` (2 in pricing, 1 in the
-finale). Both redirect after payment to the JotForm intake form. That form is
+finale). Both redirect after payment to the JotForm intake form.
+
+**Prices live in three places. Change all three together:** the visible pricing
+cards, the JSON-LD block in `<head>`, and `llms.txt` at the domain root. A probe in
+the browser asserts the schema prices match the visible ones; nothing checks
+`llms.txt`. That form is
 deliberately **not** linked anywhere on the page: buyers reach it only via Stripe's
 post-payment redirect.
 
