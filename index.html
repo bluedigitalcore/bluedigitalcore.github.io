@@ -817,6 +817,10 @@ const CONTENT = {
   <div class="container">
     <p class="name" id="footerName"></p>
     <p id="footerEmail"></p>
+    <!-- Static on purpose. The script only writes #footerName, #footerEmail and
+         #footerNote, so this survives, and a real href in the served HTML is
+         what lets a crawler discover the page. -->
+    <p class="note">Also from Blue Digital Core: <a href="/let-me-dress-your-avatar/">Let Me Dress Your Avatar</a>, custom outfit design for AI avatars.</p>
     <p class="note" id="footerNote"></p>
   </div>
 </footer>
