@@ -66,6 +66,11 @@ nothing at all.
 is hidden. Do not "helpfully" snap to the final value on `document.hidden`; queued
 rAF callbacks resume on their own when the page returns.
 
+**`img` needs `height:auto` in the base rule.** With `width`/`height` attributes on
+the tag (good practice, it reserves layout space) an intrinsic `height=""` beats
+`aspect-ratio` and the image renders at its raw pixel height. The pack covers came
+out as tall portraits until the base rule set `height:auto`.
+
 ## Mobile differences
 
 - hero is 460vh instead of 900vh
@@ -90,10 +95,25 @@ deliberately **not** linked anywhere on the page: buyers reach it only via Strip
 post-payment redirect.
 
 The **packs** section links out to three Beacons product pages (prompt packs, a
-separate DIY product from the done-for-you service). Prices are deliberately not
-shown on this page: Beacons runs changing promos and discount codes, so any price
-hardcoded here goes stale with nothing to catch it. Beacons shows the live price on
-click. The Halloween pack is seasonal and the markup makes swapping a card trivial.
+separate DIY product from the done-for-you service).
+
+No price is written in the page text. Beacons runs changing promos and discount
+codes, so a price hardcoded here would go stale with nothing to catch it, and
+Beacons shows the live price on click. One exception is outside our control: the
+Emoji Couture banner has "LAUNCH $5 $27" baked into the artwork. It matches Beacons
+today. When that launch ends the banner needs re-exporting, since no code change can
+fix a number that is pixels.
+
+The cards are the banners. Each banner is a finished design carrying its own
+typeset title, so the card does not set the name again; it shows the image full
+bleed with a descriptor bar and arrow beneath. Covers are 900px wide JPGs in
+`assets/packs/`, converted from the 1920x1080 originals in `pack-covers/`.
+
+The Lace & Vows banner carries a "FOR ADULT CREATORS 18+" line. That is Blue's own
+caution because the lingerie is sexy; there is no nudity in the pack. It is not a
+content problem to re-raise.
+
+The Halloween pack is seasonal and the markup makes swapping a card trivial.
 
 ## Palette
 
