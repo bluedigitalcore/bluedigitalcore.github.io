@@ -18,8 +18,9 @@ the page has zero external dependencies apart from Google Fonts.
 Edit the source, then copy `index.html`, `styles.css` and `app.js` into the deployed
 folder and commit there. Editing only one silently diverges them.
 
-**Never commit `Footage/`.** The source header video is 179 MB and GitHub rejects
-files over 100 MB, so the push fails outright.
+**Never commit `Footage/` or `pack-covers/`.** These hold full-size source art. The
+header video alone is 179 MB and GitHub rejects files over 100 MB, so the push fails
+outright. Web-sized derivatives live in `assets/`, `frames/`, `posters/` and `clips/`.
 
 ## Updating
 
