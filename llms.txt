@@ -36,11 +36,19 @@ Monthly Wardrobe. 67 USD per month.
 After checkout the buyer receives a short intake form to send avatar references
 and describe what they want.
 
+Looks designed through the wardrobe service are the buyer's to use commercially.
+
+### Exclusivity
+
+The wardrobe service is one to one. Looks are designed for a single buyer, belong
+to that buyer alone, and are never reused or featured in any prompt pack.
+
 ### Ready-made prompt packs
 
 Separate from the done-for-you service, there are self-serve AI image prompt packs
 sold through Beacons. These are prompts the buyer runs themselves, not finished
-renders made to order:
+renders made to order, and every buyer of a pack can create the same outfits from
+it. They are not exclusive, unlike the wardrobe service:
 
 - Dressed to Haunt, a Halloween costume prompt pack
 - Emoji Couture, wear the emoji
