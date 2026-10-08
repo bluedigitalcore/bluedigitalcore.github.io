@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Video Tool Rota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+/* Layout: one shared 24-hour track per day (Blue and Rav together on the same bar), with that day's bookings listed right under it. */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#17191f; --muted:#5d6370; --line:#dfe2e8; --track:#eceef2;
+  --blue:#0047ab; --blue-bar:#8fb0ec; --blue-ink:#0b2a63; --blue-soft:#e3ebfa; --rav:#111111; --rav-bar:#111111; --rav-edge:transparent; --rav-hatch:#111111; --rav-soft:#e6e6e8; --ok:#1f7a4f;
+  --away:#7d828c; --clash:#c4352b; --clash-soft:#fbe5e2; --now:#e8a514;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12141a; --surface:#1b1e26; --fg:#eceef3; --muted:#9aa1ae; --line:#2c303b; --track:#252932;
+  --blue:#3b72d9; --blue-bar:#8fb0ec; --blue-ink:#0b2a63; --blue-soft:#1e2c4d; --rav:#000000; --rav-bar:#000000; --rav-edge:#8a909c; --rav-hatch:#8a909c; --rav-soft:#2b2d33; --ok:#5fd39c;
+  --away:#9097a3; --clash:#ff7a6e; --clash-soft:#4a211e; --now:#f2c45a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12141a; --surface:#1b1e26; --fg:#eceef3; --muted:#9aa1ae; --line:#2c303b; --track:#252932;
+  --blue:#3b72d9; --blue-bar:#8fb0ec; --blue-ink:#0b2a63; --blue-soft:#1e2c4d; --rav:#000000; --rav-bar:#000000; --rav-edge:#8a909c; --rav-hatch:#8a909c; --rav-soft:#2b2d33; --ok:#5fd39c;
+  --away:#9097a3; --clash:#ff7a6e; --clash-soft:#4a211e; --now:#f2c45a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;padding:0 16px;padding-block:24px 64px}
+.wrap{max-width:760px;margin:0 auto;display:grid;gap:18px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.7rem,5vw,2.3rem);line-height:1.05;margin:0;letter-spacing:-.01em}
+.lede{color:var(--muted);margin:6px 0 0;max-width:60ch}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:14px}
+.row-flex{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px;background:var(--bg)}
+.seg button{border:0;background:transparent;color:var(--fg);font:600 .9rem var(--f-body);padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.seg button[aria-pressed="true"].blue{background:var(--blue);color:#fff}
+.seg button[aria-pressed="true"].rav{background:var(--rav);color:#fff;box-shadow:inset 0 0 0 1px var(--rav-edge)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--now);outline-offset:2px}
+.field{display:grid;gap:4px;min-width:0}
+input,select{font:500 .95rem var(--f-body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:100%}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.primary{border:0;border-radius:10px;padding:11px 18px;font:700 .95rem var(--f-body);color:#fff;background:var(--blue);cursor:pointer}
+.primary.rav{background:var(--rav);box-shadow:inset 0 0 0 1px var(--rav-edge)}
+.primary:disabled{opacity:.5;cursor:not-allowed}
+.ghost{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;padding:10px 14px;font:600 .9rem var(--f-body);cursor:pointer}
+.preview{font-size:.9rem;color:var(--muted);margin:0}
+.preview b{color:var(--fg);font-family:var(--f-mono);font-weight:500}
+.msg{font-size:.88rem;margin:0}
+.msg.err{color:var(--clash)} .msg.ok{color:var(--ok)}
+.remind{font-size:.85rem;color:var(--muted);margin:0}
+.status{font-size:.85rem;color:var(--muted);margin:0}
+.status.err{color:var(--clash)}
+
+.now{border-left:4px solid var(--now);background:var(--surface);border-radius:4px 12px 12px 4px;padding:12px 16px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.now strong{font-family:var(--f-display);font-weight:600;font-size:1.1rem}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:4px;flex:none}
+.hatch{background:repeating-linear-gradient(-45deg,var(--away) 0 3px,transparent 3px 6px);border:1px solid var(--away)}
+
+.day{display:grid;gap:8px;padding-top:10px}
+.day h2{font-family:var(--f-display);font-weight:600;font-size:1.15rem;margin:0}
+.track{position:relative;height:46px;background:var(--track);border-radius:8px;overflow:hidden}
+.track .tick{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.track .out{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 5px);opacity:.7}
+.blk{position:absolute;height:50%;border-radius:4px;min-width:3px}
+.blk.blue{top:0}.blk.rav{top:50%}
+.blk.use.blue{background:var(--blue-bar)} .blk.use.rav{background:var(--rav-bar);box-shadow:inset 0 0 0 1px var(--rav-edge)}
+.blk.away.blue{background:repeating-linear-gradient(-45deg,var(--blue-bar) 0 3px,transparent 3px 7px);opacity:.8}
+.blk.away.rav{background:repeating-linear-gradient(-45deg,var(--rav-hatch) 0 3px,transparent 3px 7px);opacity:.7}
+.blk.clash{outline:2px solid var(--clash);outline-offset:-2px}
+.nowline{position:absolute;top:0;bottom:0;width:2px;background:var(--now)}
+.axis{position:relative;height:14px;font:500 .68rem var(--f-mono);color:var(--muted)}
+.axis span{position:absolute;transform:translateX(-50%)}
+.axis span:first-child{transform:none}.axis span:last-child{transform:translateX(-100%)}
+
+.list{display:grid;gap:6px}
+.item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.item.clash{border-color:var(--clash);background:var(--clash-soft)}
+.badge{font:700 .78rem var(--f-body);padding:4px 9px;border-radius:999px;white-space:nowrap}
+.badge.blue.use{background:var(--blue-bar);color:var(--blue-ink)}.badge.rav.use{background:var(--rav);color:#fff;box-shadow:inset 0 0 0 1px var(--rav-edge)}
+.badge.blue.away{background:var(--blue-soft);color:var(--fg)}.badge.rav.away{background:var(--rav-soft);color:var(--fg)}
+.when{min-width:0}
+.when .mine{font:500 .92rem var(--f-mono);font-variant-numeric:tabular-nums}
+.when .theirs{display:block;font-size:.78rem;color:var(--muted)}
+.when .note{display:block;font-size:.82rem;color:var(--muted);overflow-wrap:anywhere}
+.when .note.bad{color:var(--clash)}
+.acts{display:flex;gap:6px}
+.acts button{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:5px 9px;font:600 .8rem var(--f-body);cursor:pointer}
+.acts button.danger{border-color:var(--clash);color:var(--clash)}
+.acts{flex-wrap:wrap;justify-content:flex-end}
+.ghost.danger{border-color:var(--clash);color:var(--clash)}
+.empty{font-size:.88rem;color:var(--muted);margin:0}
+@media (max-width:480px){.item{grid-template-columns:minmax(0,1fr) auto}.item .badge{grid-column:1/-1;justify-self:start}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Video Tool Rota</h1>
+    <p class="lede">Blue 💙 in Amsterdam, Raven 🖤 in Australia, one shared account. Claim the time you'll be creating, block the time you're away, and see everything in your own clock with the other time underneath.</p>
+  </header>
+
+  <section class="panel" aria-label="Who are you">
+    <div class="row-flex">
+      <span class="label">I am</span>
+      <div class="seg" role="group" aria-label="I am">
+        <button type="button" class="blue" id="me-blue" aria-pressed="false">Blue 💙</button>
+        <button type="button" class="rav" id="me-rav" aria-pressed="false">Raven 🖤</button>
+      </div>
+    </div>
+    <label class="field" style="max-width:340px"><span class="label">Raven's city (time zone)</span>
+      <select id="rav-tz">
+        <option value="Australia/Sydney">Sydney / Melbourne / Canberra / Hobart</option>
+        <option value="Australia/Brisbane">Brisbane</option>
+        <option value="Australia/Adelaide">Adelaide</option>
+        <option value="Australia/Darwin">Darwin</option>
+        <option value="Australia/Perth">Perth</option>
+      </select>
+    </label>
+    <p class="status" id="sync">Connecting to the shared schedule…</p>
+  </section>
+
+  <div class="now" aria-live="polite"><span class="label">Right now</span><br><strong id="now-text">Loading…</strong></div>
+
+  <form class="panel" id="form" aria-label="Add a time">
+    <div class="row-flex" style="justify-content:space-between">
+      <span class="label" id="form-title">Add a time</span>
+      <div class="seg" role="group" aria-label="Type">
+        <button type="button" id="k-use" aria-pressed="true">Claim the time</button>
+        <button type="button" id="k-away" aria-pressed="false">Not available</button>
+      </div>
+    </div>
+    <div class="fields">
+      <label class="field"><span class="label">Start date</span><input type="date" id="f-date" required></label>
+      <label class="field"><span class="label" id="lbl-time">Start time</span><input type="time" id="f-time" step="60" required></label>
+    </div>
+    <div class="field">
+      <span class="label">How long</span>
+      <div class="seg" role="group" aria-label="How long">
+        <button type="button" data-h="4" aria-pressed="true">4 hours</button>
+        <button type="button" data-h="8" aria-pressed="false">8 hours</button>
+        <button type="button" data-h="12" aria-pressed="false">12 hours</button>
+        <button type="button" data-h="custom" aria-pressed="false">Pick end time</button>
+      </div>
+    </div>
+    <div class="fields" id="custom-end" hidden>
+      <label class="field"><span class="label">End date</span><input type="date" id="f-edate"></label>
+      <label class="field"><span class="label">End time</span><input type="time" id="f-etime" step="60"></label>
+    </div>
+    <label class="field"><span class="label">Note (optional)</span><input type="text" id="f-note" maxlength="80" placeholder="e.g. rendering the long batch"></label>
+    <p class="preview" id="preview"></p>
+    <div class="row-flex">
+      <button type="submit" class="primary" id="save">Save</button>
+      <button type="button" class="ghost danger" id="clear-edit" hidden>Clear this time</button>
+      <button type="button" class="ghost" id="cancel-edit" hidden>Cancel edit</button>
+      <p class="remind" id="remind">Press Save, otherwise Raven 🖤 can't see it.</p>
+      <p class="msg" id="form-msg" role="status"></p>
+    </div>
+  </form>
+
+  <section aria-label="Schedule" style="display:grid;gap:8px">
+    <div class="legend">
+      <span><span class="sw" style="background:var(--blue-bar)"></span>Blue 💙 using</span>
+      <span><span class="sw" style="background:var(--rav-bar);box-shadow:inset 0 0 0 1px var(--rav-edge)"></span>Raven 🖤 using</span>
+      <span><span class="sw hatch"></span>Not available</span>
+      <span><span class="sw" style="outline:2px solid var(--clash);outline-offset:-2px"></span>Overlap</span>
+      <span><span class="sw" style="background:var(--now);width:3px"></span>Now</span>
+    </div>
+    <p class="empty" id="axis-note"></p>
+    <div id="days"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  // ---- Supabase connection (anon key is public by design) ----
+  const SUPA_URL = "https://eykvtqxiatvfvbtgwopz.supabase.co";
+  const SUPA_KEY = "sb_publishable_DlC94y_csfnl4irc5JeAfA_E4719p8H";
+  const TABLE = "rota_bookings";
+  async function api(method, query, body){
+    const res = await fetch(SUPA_URL + "/rest/v1/" + TABLE + (query || ""), {
+      method,
+      headers: { apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok){ const t = await res.text().catch(()=> ""); const e = new Error(t); e.code = "HTTP " + res.status; throw e; }
+    return method === "GET" ? res.json() : null;
+  }
+  async function load(){
+    try {
+      const rows = await api("GET", "?select=*&order=start_ms.asc");
+      state.items = rows.map(x => ({id:x.id, who:x.who, kind:x.kind, start:Number(x.start_ms), end:Number(x.end_ms), note:x.note || ""}))
+        .filter(i => (i.who==="blue"||i.who==="rav") && (i.kind==="use"||i.kind==="away") && isFinite(i.start) && isFinite(i.end));
+      state.db = true;
+      setSync(state.me ? "Live. Changes show up for both of you." : "Live. Tap Blue or Raven above to start.");
+      render();
+    } catch(e){ setSync("Can't reach the shared schedule right now (" + (e.code || "network") + "). It retries by itself.", true); }
+  }
+
+  const AMS = "Europe/Amsterdam";
+  const WIN_START = Date.UTC(2026,9,8,23);  // Fri 9 Oct 01:00 Amsterdam
+  const WIN_END   = Date.UTC(2026,9,11,22); // Mon 12 Oct 00:00 Amsterdam
+  const H = 3600e3;
+  const NAME = {blue:"Blue 💙", rav:"Raven 🖤"};
+  const KIND = {use:"Using", away:"Not available"};
+
+  const state = { me:null, kind:"use", dur:"4", ravTz:"Australia/Sydney", items:[], db:null, editId:null, confirmDel:null };
+  try { const m = localStorage.getItem("rota-me2"); if (m === "blue" || m === "rav") state.me = m; const z = localStorage.getItem("rota-ravtz"); if (z) state.ravTz = z; } catch(e){}
+
+  const $ = id => document.getElementById(id);
+  const tzOf = w => w === "rav" ? state.ravTz : AMS;
+  const myTz = () => tzOf(state.me || "blue");
+  const otherTz = () => tzOf(state.me === "rav" ? "blue" : "rav");
+  const cityOf = tz => tz === AMS ? "Amsterdam" : $("rav-tz").querySelector('option[value="'+tz+'"]').textContent.split(" /")[0];
+  const fmt = (t, tz, o) => new Intl.DateTimeFormat("en-GB", Object.assign({timeZone:tz, hour12:false}, o)).format(new Date(t));
+  const hm = (t,tz) => fmt(t,tz,{hour:"2-digit",minute:"2-digit"});
+  const dhm = (t,tz) => fmt(t,tz,{weekday:"short",day:"numeric",month:"short"}) + " " + hm(t,tz);
+  const dur = ms => { const m = Math.round(ms/60000); return Math.floor(m/60) + "h" + (m%60 ? " " + (m%60) + "m" : ""); };
+
+  function parts(t, tz){
+    const p = {}; new Intl.DateTimeFormat("en-US",{timeZone:tz,hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}).formatToParts(new Date(t)).forEach(x=>p[x.type]=x.value);
+    return p;
+  }
+  function offset(t, tz){ const p = parts(t,tz); return Date.UTC(+p.year, +p.month-1, +p.day, +p.hour%24, +p.minute, +p.second) - Math.floor(t/1000)*1000; }
+  function zoned(dateStr, timeStr, tz){
+    const [y,m,d] = dateStr.split("-").map(Number), [hh,mm] = timeStr.split(":").map(Number);
+    const wall = Date.UTC(y,m-1,d,hh,mm); let t = wall;
+    for (let i=0;i<3;i++) t = wall - offset(t, tz);
+    return t;
+  }
+  const ymd = (t,tz) => { const p = parts(t,tz); return p.year+"-"+p.month+"-"+p.day; };
+  const hhmm = (t,tz) => { const p = parts(t,tz); return String(+p.hour%24).padStart(2,"0")+":"+p.minute; };
+  const addDay = s => { const [y,m,d]=s.split("-").map(Number); return new Date(Date.UTC(y,m-1,d+1)).toISOString().slice(0,10); };
+
+  const overlaps = (a,b) => a.start < b.end && b.start < a.end;
+  function clashIds(){
+    const s = new Set(), uses = state.items.filter(i=>i.kind==="use");
+    for (let i=0;i<uses.length;i++) for (let j=i+1;j<uses.length;j++)
+      if (uses[i].who !== uses[j].who && overlaps(uses[i],uses[j])) { s.add(uses[i].id); s.add(uses[j].id); }
+    return s;
+  }
+
+  // ---------- form ----------
+  function formRange(){
+    const d = $("f-date").value, tm = $("f-time").value;
+    if (!d || !tm) return null;
+    const start = zoned(d, tm, myTz());
+    if (state.dur !== "custom") return {start, end: start + (+state.dur)*H};
+    const ed = $("f-edate").value, et = $("f-etime").value;
+    return {start, end: (ed && et) ? zoned(ed, et, myTz()) : null};
+  }
+  function updatePreview(){
+    const r = formRange(), el = $("preview");
+    el.textContent = "";
+    if (!r || !r.end) return;
+    if (r.end <= r.start){ el.textContent = "The end time is before the start time."; return; }
+    const other = state.me === "rav" ? NAME.blue : NAME.rav;
+    const b1 = document.createElement("b"), b2 = document.createElement("b");
+    b1.textContent = dhm(r.start,myTz()) + "–" + hm(r.end,myTz());
+    b2.textContent = dhm(r.start,otherTz()) + "–" + hm(r.end,otherTz());
+    el.append("That's ", b1, " your time, ", b2, " for " + other + " (" + dur(r.end - r.start) + ").");
+  }
+  function setFormDefaults(){
+    const t = Math.max(Math.ceil(Date.now()/(5*60e3))*(5*60e3), WIN_START);
+    $("f-date").value = ymd(t, myTz()); $("f-time").value = hhmm(t, myTz());
+    $("f-edate").value = ymd(t+4*H, myTz()); $("f-etime").value = hhmm(t+4*H, myTz());
+  }
+  function setKind(k){ state.kind = k; $("k-use").setAttribute("aria-pressed", k==="use"); $("k-away").setAttribute("aria-pressed", k==="away"); }
+  function setDur(h){ state.dur = h; document.querySelectorAll("[data-h]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.h===h)); $("custom-end").hidden = h!=="custom"; updatePreview(); }
+  function formMsg(t, kind){ const m = $("form-msg"); m.textContent = t; m.className = "msg" + (kind ? " " + kind : ""); }
+
+  $("k-use").addEventListener("click", ()=>setKind("use"));
+  $("k-away").addEventListener("click", ()=>setKind("away"));
+  document.querySelectorAll("[data-h]").forEach(b=>b.addEventListener("click", ()=>setDur(b.dataset.h)));
+  ["f-date","f-time","f-edate","f-etime"].forEach(id=>$(id).addEventListener("input", updatePreview));
+
+  function startEdit(it){
+    state.editId = it.id;
+    setKind(it.kind);
+    $("f-date").value = ymd(it.start,myTz()); $("f-time").value = hhmm(it.start,myTz());
+    const len = (it.end - it.start)/H;
+    if ([4,8,12].includes(len)) setDur(String(len));
+    else { $("f-edate").value = ymd(it.end,myTz()); $("f-etime").value = hhmm(it.end,myTz()); setDur("custom"); }
+    $("f-note").value = it.note || "";
+    $("form-title").textContent = "Edit your time"; $("save").textContent = "Save changes"; $("cancel-edit").hidden = false; $("clear-edit").hidden = false; $("clear-edit").textContent = "Clear this time";
+    formMsg(""); updatePreview();
+    $("form").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+  }
+  function endEdit(){
+    state.editId = null; $("form-title").textContent = "Add a time"; $("save").textContent = "Save"; $("cancel-edit").hidden = true; $("clear-edit").hidden = true; $("f-note").value = "";
+  }
+  $("clear-edit").addEventListener("click", async () => {
+    const b = $("clear-edit");
+    if (b.textContent !== "Tap again to clear"){ b.textContent = "Tap again to clear"; return; }
+    const id = state.editId; await del(id); setFormDefaults(); updatePreview(); formMsg("Cleared. The time is free again.", "ok");
+  });
+  $("cancel-edit").addEventListener("click", ()=>{ endEdit(); setFormDefaults(); updatePreview(); formMsg(""); });
+
+  $("form").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!state.me){ formMsg("Tap Blue or Raven at the top first.", "err"); return; }
+    if (!state.db){ formMsg("Not connected yet. Wait a moment and try again.", "err"); return; }
+    const r = formRange();
+    if (!r || !r.end){ formMsg("Fill in the start (and end) date and time.", "err"); return; }
+    if (r.end <= r.start){ formMsg("The end time has to be after the start time.", "err"); return; }
+    if (state.kind === "use"){
+      const hit = state.items.find(i => i.kind==="use" && i.who!==state.me && i.id!==state.editId && overlaps(i, r));
+      if (hit){ formMsg(NAME[hit.who] + " already claimed " + dhm(hit.start,myTz()) + "–" + hm(hit.end,myTz()) + ". Pick a time around it.", "err"); return; }
+    }
+    const data = {who:state.me, kind:state.kind, start:r.start, end:r.end, note:$("f-note").value.trim()};
+    $("save").disabled = true;
+    const wasEdit = !!state.editId;
+    try {
+      const row = {who:data.who, kind:data.kind, start_ms:data.start, end_ms:data.end, note:data.note};
+      if (wasEdit) await api("PATCH", "?id=eq." + encodeURIComponent(state.editId), row);
+      else await api("POST", "", row);
+      await load();
+      formMsg(wasEdit ? "Updated." : "Saved. " + (state.me==="rav"?NAME.blue:NAME.rav) + " can see it now.", "ok");
+      endEdit(); setFormDefaults(); updatePreview();
+    } catch(err){
+      formMsg("Couldn't save (" + (err && err.code || "error") + "). Check your internet and try again.", "err");
+    } finally { $("save").disabled = false; }
+  });
+
+  // ---------- render ----------
+  function render(){
+    $("me-blue").setAttribute("aria-pressed", state.me==="blue");
+    $("me-rav").setAttribute("aria-pressed", state.me==="rav");
+    $("rav-tz").value = state.ravTz;
+    $("save").className = "primary" + (state.me==="rav" ? " rav" : "");
+    $("remind").textContent = "Press Save, otherwise " + (state.me==="rav" ? NAME.blue : NAME.rav) + " can't see it.";
+    $("lbl-time").textContent = "Start time (" + cityOf(myTz()) + ")";
+    $("axis-note").textContent = "Each bar is one day, 00:00 to 24:00 " + cityOf(myTz()) + " time. Top half Blue, bottom half Raven. Shaded parts are outside the three days.";
+
+    const clashes = clashIds();
+    const tz = myTz(), now = Date.now();
+    const days = $("days"); days.textContent = "";
+    const firstDay = ymd(WIN_START, tz), lastDay = ymd(WIN_END - 1, tz);
+    const sorted = state.items.slice().sort((a,b)=>a.start-b.start);
+    let d = firstDay;
+    for (let guard=0; guard<8; guard++){
+      const ds = zoned(d,"00:00",tz), de = zoned(addDay(d),"00:00",tz), span = de-ds;
+      const sec = document.createElement("div"); sec.className = "day";
+      const h = document.createElement("h2"); h.textContent = fmt(ds+H, tz, {weekday:"long", day:"numeric", month:"long"}); sec.appendChild(h);
+      const tr = document.createElement("div"); tr.className = "track";
+      [6,12,18].forEach(x=>{ const t=document.createElement("div"); t.className="tick"; t.style.left=(x/24*100)+"%"; tr.appendChild(t); });
+      if (WIN_START > ds){ const o=document.createElement("div"); o.className="out"; o.style.left="0"; o.style.width=Math.min(100,(WIN_START-ds)/span*100)+"%"; tr.appendChild(o); }
+      if (WIN_END < de){ const o=document.createElement("div"); o.className="out"; const l=Math.max(0,(WIN_END-ds)/span*100); o.style.left=l+"%"; o.style.width=(100-l)+"%"; tr.appendChild(o); }
+      sorted.filter(i => i.start < de && i.end > ds).forEach(i=>{
+        const b = document.createElement("div");
+        b.className = "blk " + i.who + " " + i.kind + (clashes.has(i.id) ? " clash" : "");
+        const l = Math.max(0,(i.start-ds)/span*100), r = Math.min(100,(i.end-ds)/span*100);
+        b.style.left = l+"%"; b.style.width = (r-l)+"%";
+        b.title = NAME[i.who] + " · " + KIND[i.kind] + " · " + hm(i.start,tz) + "–" + hm(i.end,tz);
+        tr.appendChild(b);
+      });
+      if (now >= ds && now < de){ const n=document.createElement("div"); n.className="nowline"; n.style.left=((now-ds)/span*100)+"%"; tr.appendChild(n); }
+      sec.appendChild(tr);
+      const ax = document.createElement("div"); ax.className = "axis";
+      ["00","06","12","18","24"].forEach((x,k)=>{ const s=document.createElement("span"); s.textContent=x; s.style.left=(k*25)+"%"; ax.appendChild(s); });
+      sec.appendChild(ax);
+
+      const list = document.createElement("div"); list.className = "list";
+      const starting = sorted.filter(i => (i.start >= ds || d === firstDay) && i.start < de && (d !== lastDay || true));
+      const lastExtra = d === lastDay ? sorted.filter(i => i.start >= de) : [];
+      const show = starting.concat(lastExtra);
+      if (!show.length){ const p=document.createElement("p"); p.className="empty"; p.textContent="Nothing booked to start this day yet."; list.appendChild(p); }
+      show.forEach(i => list.appendChild(itemEl(i, clashes.has(i.id))));
+      sec.appendChild(list);
+      days.appendChild(sec);
+      if (d === lastDay) break;
+      d = addDay(d);
+    }
+    renderNow();
+  }
+
+  function itemEl(i, clash){
+    const tz = myTz(), oz = otherTz();
+    const el = document.createElement("div"); el.className = "item" + (clash ? " clash" : "");
+    const badge = document.createElement("span"); badge.className = "badge " + i.who + " " + i.kind;
+    badge.textContent = NAME[i.who] + " · " + KIND[i.kind];
+    const w = document.createElement("div"); w.className = "when";
+    const a = document.createElement("span"); a.className = "mine";
+    a.textContent = hm(i.start,tz) + "–" + hm(i.end,tz) + (ymd(i.start,tz)!==ymd(i.end,tz) ? " (next day)" : "") + " · " + dur(i.end-i.start);
+    const b = document.createElement("span"); b.className = "theirs";
+    b.textContent = cityOf(oz) + ": " + dhm(i.start,oz) + "–" + hm(i.end,oz);
+    w.append(a,b);
+    if (clash){ const c=document.createElement("span"); c.className="note bad"; c.textContent="Overlaps the other person's claim."; w.appendChild(c); }
+    if (i.note){ const n=document.createElement("span"); n.className="note"; n.textContent = i.note; w.appendChild(n); }
+    el.append(badge, w);
+    const acts = document.createElement("div"); acts.className = "acts";
+    if (i.who === state.me && state.db){
+      if (state.confirmDel === i.id){
+        const y = document.createElement("button"); y.type="button"; y.className="danger"; y.textContent="Yes, clear it"; y.addEventListener("click", ()=>del(i.id));
+        const n = document.createElement("button"); n.type="button"; n.textContent="No, keep it"; n.addEventListener("click", ()=>{ state.confirmDel=null; render(); });
+        acts.append(y,n);
+      } else {
+        const e = document.createElement("button"); e.type="button"; e.textContent="Edit"; e.addEventListener("click", ()=>startEdit(i));
+        const x = document.createElement("button"); x.type="button"; x.className="danger"; x.textContent="Clear time"; x.addEventListener("click", ()=>{ state.confirmDel=i.id; render(); });
+        acts.append(e,x);
+      }
+    }
+    el.appendChild(acts);
+    return el;
+  }
+
+  async function del(id){
+    state.confirmDel = null;
+    try { await api("DELETE", "?id=eq." + encodeURIComponent(id)); await load(); formMsg("Cleared. The time is free again.", "ok"); }
+    catch(e){ setSync("Couldn't remove it (" + (e && e.code || "error") + ").", true); }
+    if (state.editId === id) endEdit();
+    render();
+  }
+
+  function renderNow(){
+    const now = Date.now(), tz = myTz(), el = $("now-text");
+    if (now >= WIN_END){ el.textContent = "The three days are over."; return; }
+    const cur = state.items.filter(i => i.kind==="use" && i.start <= now && now < i.end);
+    if (cur.length > 1) el.textContent = "You both claimed this moment. Check the red items below.";
+    else if (cur.length === 1) el.textContent = NAME[cur[0].who] + " is using the tool until " + hm(cur[0].end, tz) + " your time.";
+    else {
+      const next = state.items.filter(i=>i.kind==="use" && i.start > now).sort((a,b)=>a.start-b.start)[0];
+      el.textContent = "The tool is free." + (next ? " Next: " + NAME[next.who] + " from " + dhm(next.start, tz) + "." : "");
+    }
+  }
+
+  function setSync(msg, err){ const s = $("sync"); s.textContent = msg; s.classList.toggle("err", !!err); }
+  function setMe(w){ state.me = w; try{ localStorage.setItem("rota-me2", w); }catch(e){} endEdit(); setFormDefaults(); updatePreview(); render(); if (state.db) setSync("Live. Changes show up for both of you."); }
+  $("me-blue").addEventListener("click", ()=>setMe("blue"));
+  $("me-rav").addEventListener("click", ()=>setMe("rav"));
+  $("rav-tz").addEventListener("change", e => {
+    state.ravTz = e.target.value; try{ localStorage.setItem("rota-ravtz", state.ravTz); }catch(err){} setFormDefaults(); render(); updatePreview();
+  });
+
+  setFormDefaults(); updatePreview(); render();
+  setInterval(render, 60e3);
+
+  load();
+  setInterval(() => { if (!document.hidden) load(); }, 8000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
