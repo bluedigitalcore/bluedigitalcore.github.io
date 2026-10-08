@@ -137,6 +137,21 @@ The `<head>` carries JSON-LD: `Organization`, `Service` with both offers, and
 FAQ answer changes on the page it must change in the schema too. A browser probe
 asserts the schema questions match the visible ones exactly.
 
+**Every product fact lives in three places. Change all three together:** the visible
+copy, the JSON-LD in `<head>`, and `llms.txt` at the domain root. That covers prices,
+turnaround, revision policy, commercial use and exclusivity. Only the schema parity
+is machine-checked; `llms.txt` is not, so it is the one most likely to go stale.
+
+The FAQ is 9 questions in a `<details>` accordion after pricing. It exists as much
+for findability as for buyers: it took the page from 344 to 632 indexable words,
+which was the ceiling on both search ranking and being quoted by an AI assistant.
+Schema and `llms.txt` make facts parseable; only real sentences give a model
+something to quote.
+
+Two of those answers are commitments Blue made explicitly: the looks are the
+buyer's to use commercially, and wardrobe work is exclusive and never appears in
+a prompt pack.
+
 ## Palette
 
 Fixed and exact. Do not substitute.
