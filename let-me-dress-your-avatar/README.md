@@ -120,6 +120,23 @@ content problem to re-raise.
 
 The Halloween pack is seasonal and the markup makes swapping a card trivial.
 
+## Search and answer engines
+
+Domain-root files in the parent repo, not this folder: `robots.txt`, `sitemap.xml`,
+`llms.txt` and the Google Search Console verification file. They only work at the
+root, so they cannot move in here.
+
+`robots.txt` allows search and retrieval crawlers but disallows AI *training*
+crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot and others). `OAI-SearchBot`,
+`ChatGPT-User` and `PerplexityBot` stay allowed on purpose: those fetch a page to
+answer a question and cite it, which is how the site can appear in an AI answer.
+Blocking them would undo that. robots.txt is voluntary and enforces nothing.
+
+The `<head>` carries JSON-LD: `Organization`, `Service` with both offers, and
+`FAQPage`. **Google requires FAQ schema to mirror visible page content**, so if an
+FAQ answer changes on the page it must change in the schema too. A browser probe
+asserts the schema questions match the visible ones exactly.
+
 ## Palette
 
 Fixed and exact. Do not substitute.
@@ -128,8 +145,8 @@ Fixed and exact. Do not substitute.
 `#8A7F76` muted · `#5E1F2D` accent
 
 Section tones alternate deliberately: manifesto cream, stats beige, pillars cream,
-gallery beige, packs cream, pricing beige, finale black, footer cream. A marquee
-always carries the tone of the section it leads into.
+gallery beige, packs cream, pricing beige, faq cream, finale black, footer cream. A
+marquee always carries the tone of the section it leads into.
 
 Inserting a section mid-page forces every tone after it to flip, plus the marquee
 in front of it. Re-run the tone probe after any insertion.

@@ -1,4 +1,67 @@
+# Search engines and answer engines are welcome.
 User-agent: *
+Allow: /
+
+# ---------------------------------------------------------------------------
+# AI TRAINING CRAWLERS: not welcome.
+# These are opt-outs the operators publish and honour voluntarily. robots.txt
+# is a request, not a lock, and it cannot stop a crawler that ignores it.
+# ---------------------------------------------------------------------------
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+# Gemini training only. This does NOT affect Google Search ranking.
+User-agent: Google-Extended
+Disallow: /
+
+# Apple Intelligence training only. Does NOT affect Siri or Spotlight search.
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+# ---------------------------------------------------------------------------
+# RETRIEVAL CRAWLERS: explicitly allowed.
+# These fetch a page to answer a question and cite the source. They are how the
+# site can show up inside an AI answer, and they are not training crawlers.
+# ---------------------------------------------------------------------------
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
 Allow: /
 
 Sitemap: https://bluedigitalcore.github.io/sitemap.xml
