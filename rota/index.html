@@ -57,6 +57,11 @@ input,select{font:500 .95rem var(--f-body);color:var(--fg);background:var(--bg);
 
 .now{border-left:4px solid var(--now);background:var(--surface);border-radius:4px 12px 12px 4px;padding:12px 16px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
 .now strong{font-family:var(--f-display);font-weight:600;font-size:1.1rem}
+.tally{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tally>div{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--blue-bar);border-radius:4px 12px 12px 4px;padding:12px 16px}
+.tally>div.rav{border-left-color:var(--rav-hatch)}
+.tally strong{font-family:var(--f-display);font-weight:600;font-size:1.1rem}
+.tally .sub{display:block;font-size:.85rem;color:var(--muted)}
 
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -128,6 +133,11 @@ input,select{font:500 .95rem var(--f-body);color:var(--fg);background:var(--bg);
   </section>
 
   <div class="now" aria-live="polite"><span class="label">Right now</span><br><strong id="now-text">Loading…</strong></div>
+
+  <section class="tally" aria-label="Hours per person" aria-live="polite">
+    <div class="blue"><span class="label">Blue 💙 hours</span><br><strong id="t-blue">0h planned</strong><span class="sub" id="ts-blue"></span></div>
+    <div class="rav"><span class="label">Raven 🖤 hours</span><br><strong id="t-rav">0h planned</strong><span class="sub" id="ts-rav"></span></div>
+  </section>
 
   <form class="panel" id="form" aria-label="Add a time">
     <div class="row-flex" style="justify-content:space-between">
@@ -419,7 +429,19 @@ input,select{font:500 .95rem var(--f-body);color:var(--fg);background:var(--bg);
     render();
   }
 
+  function renderTally(){
+    const now = Date.now();
+    ["blue","rav"].forEach(w => {
+      const uses = state.items.filter(i => i.who===w && i.kind==="use");
+      const planned = uses.reduce((s,i) => s + (i.end - i.start), 0);
+      const used = uses.reduce((s,i) => s + Math.max(0, Math.min(now, i.end) - i.start), 0);
+      $("t-"+w).textContent = dur(planned) + " planned";
+      $("ts-"+w).textContent = dur(used) + " used so far, " + dur(planned - used) + " still to come";
+    });
+  }
+
   function renderNow(){
+    renderTally();
     const now = Date.now(), tz = myTz(), el = $("now-text");
     if (now >= WIN_END){ el.textContent = "The three days are over."; return; }
     const cur = state.items.filter(i => i.kind==="use" && i.start <= now && now < i.end);
