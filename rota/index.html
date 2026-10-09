@@ -101,6 +101,10 @@ input,select{font:500 .95rem var(--f-body);color:var(--fg);background:var(--bg);
 .acts{flex-wrap:wrap;justify-content:flex-end}
 .ghost.danger{border-color:var(--clash);color:var(--clash)}
 .empty{font-size:.88rem;color:var(--muted);margin:0}
+.fold>summary{cursor:pointer;width:max-content;font:600 .85rem var(--f-body);color:var(--muted);padding:4px 0}
+.fold>summary:hover{color:var(--fg)}
+.fold>summary:focus-visible{outline:2px solid var(--now);outline-offset:2px;border-radius:4px}
+.fold[open]>summary{margin-bottom:6px}
 @media (max-width:480px){.item{grid-template-columns:minmax(0,1fr) auto}.item .badge{grid-column:1/-1;justify-self:start}}
 </style>
 </head>
@@ -221,7 +225,8 @@ input,select{font:500 .95rem var(--f-body);color:var(--fg);background:var(--bg);
   const NAME = {blue:"Blue 💙", rav:"Raven 🖤"};
   const KIND = {use:"Using", away:"Not available"};
 
-  const state = { me:null, kind:"use", dur:"4", ravTz:"Australia/Sydney", items:[], db:null, editId:null, confirmDel:null };
+  const state = { me:null, kind:"use", dur:"4", ravTz:"Australia/Sydney", items:[], db:null, editId:null, confirmDel:null, open:{} };
+  try { const o = JSON.parse(localStorage.getItem("rota-open") || "{}"); if (o && typeof o === "object") state.open = o; } catch(e){}
   try { const m = localStorage.getItem("rota-me2"); if (m === "blue" || m === "rav") state.me = m; const z = localStorage.getItem("rota-ravtz"); if (z) state.ravTz = z; } catch(e){}
 
   const $ = id => document.getElementById(id);
@@ -383,7 +388,15 @@ input,select{font:500 .95rem var(--f-body);color:var(--fg);background:var(--bg);
       const show = starting.concat(lastExtra);
       if (!show.length){ const p=document.createElement("p"); p.className="empty"; p.textContent="Nothing booked to start this day yet."; list.appendChild(p); }
       show.forEach(i => list.appendChild(itemEl(i, clashes.has(i.id))));
-      sec.appendChild(list);
+      // Collapsible list: past days start closed, today and later start open; a tap is remembered.
+      const fold = document.createElement("details"); fold.className = "fold";
+      fold.open = state.open[d] !== undefined ? state.open[d] : de > now;
+      const sum = document.createElement("summary");
+      sum.textContent = show.length ? show.length + (show.length === 1 ? " booking" : " bookings") : "No bookings";
+      const key = d;
+      sum.addEventListener("click", () => { state.open[key] = !fold.open; try { localStorage.setItem("rota-open", JSON.stringify(state.open)); } catch(e){} });
+      fold.append(sum, list);
+      sec.appendChild(fold);
       days.appendChild(sec);
       if (d === lastDay) break;
       d = addDay(d);
